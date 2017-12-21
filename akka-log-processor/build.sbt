@@ -8,5 +8,9 @@ lazy val root = (project in file(".")).
       version      := "0.0.1-SNAPSHOT"
     )),
     name := "akka-log-processor",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies ++= Seq(
+      scalaTest % Test,
+      akkaActor,
+      akkaActorTest % Test
+    )
   )
