@@ -14,7 +14,7 @@ class LifeCycleHooksTest extends TestKit(ActorSystem("LifeCycleHooksTest")) with
     "log lifecycle hooks" in {
       val testActorRef = system.actorOf(Props[LifeCycleHooks], "LifeCycleHooks")
       watch(testActorRef)
-      //testActorRef ! "hello"
+      testActorRef ! "restart"
       testActorRef.tell("hello", testActor)
       expectMsg("hello")
       system.stop(testActorRef)
