@@ -24,7 +24,7 @@ trait EventMarshalling extends DefaultJsonProtocol {
     }
   }
 
-  implicit val stateFormat = new JF[State] {
+  implicit val stateFormat = new JsonFormat[State] {
     override def write(state: State) = JsString(State.norm(state))
 
     override def read(value: JsValue) = value match {
