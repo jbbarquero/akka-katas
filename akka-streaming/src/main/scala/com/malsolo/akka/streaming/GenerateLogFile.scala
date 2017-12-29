@@ -31,6 +31,7 @@ object GenerateLogFile extends App {
 
   def lines(i: Int) = {
     val host = hostname()
+    val service = "service"
     val time = ZonedDateTime.now.format(DateTimeFormatter.ISO_INSTANT)
     val state = if (i % 10 == 0) "warining"
       else if (i % 101 == 0) "error"
@@ -40,7 +41,7 @@ object GenerateLogFile extends App {
     val tag = "tag"
     val metric = rnd.nextDouble() * 100
 
-    s"$host | $time | $state | $time | $description | $tag | $metric \n"
+    s"$host | $service | $state | $time | $description | $tag | $metric \n"
   }
 
   val graph = Source.fromIterator { () =>

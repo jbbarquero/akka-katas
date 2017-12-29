@@ -15,7 +15,7 @@ object StreamingCopy extends App {
   if (args.length != 2) {
     System.err.print("Usage. Provide two args: input-file output-file")
     System.exit(1)
-  }
+}
 
   val source: Source[ByteString, Future[IOResult]] = FileIO.fromPath(Paths.get(args(0)))
   val sink: Sink[ByteString, Future[IOResult]] = FileIO.toPath(Paths.get(args(1)), Set(CREATE, WRITE, APPEND))
