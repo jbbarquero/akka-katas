@@ -29,7 +29,7 @@ object GenerateLogFile extends App {
     if (os.indexOf("win") >= 0) System.getenv("COMPUTERNAME") else System.getenv("HOSTNAME")
   }
 
-  def line(i: Int) = {
+  def lines(i: Int) = {
     val host = hostname()
     val time = ZonedDateTime.now.format(DateTimeFormatter.ISO_INSTANT)
     val state = if (i % 10 == 0) "warining"
@@ -44,8 +44,8 @@ object GenerateLogFile extends App {
   }
 
   val graph = Source.fromIterator { () =>
-    Iterator.tabulate(numberOfLines)(line)
-  }.map(l => ByteString(1)).toMat(sink)(Keep.right)
+    Iterator.tabulate(numberOfLines)(lines)
+  }.map(line => ByteString(line)).toMat(sink)(Keep.right)
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
