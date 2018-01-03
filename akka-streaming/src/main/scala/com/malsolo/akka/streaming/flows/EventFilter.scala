@@ -32,7 +32,9 @@ object EventFilter extends App with EventMarshalling {
 
   val frame: Flow[ByteString, String, NotUsed] = Framing.delimiter(ByteString("/n"), maxLine).map(_.decodeString("UTF8"))
 
-  //val parse: Flow[String, Event, NotUsed] = Flow[String].map(LogS)
+  val parse: Flow[String, Event, NotUsed] = Flow[String].map(LogStreamProcessor.parseLineEx).collect {
+    case Some(e) => e
+  }
 
 
 
