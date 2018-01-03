@@ -30,4 +30,8 @@ object EventFilter extends App with EventMarshalling {
       System.exit(2)
   }
 
+  val frame: Flow[ByteString, String, NotUsed] = Framing.delimiter(ByteString("/n"), maxLine).map(_.decodeString("UTF8"))
+
+
+
 }
