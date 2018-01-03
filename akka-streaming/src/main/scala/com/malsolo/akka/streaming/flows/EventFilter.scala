@@ -38,6 +38,9 @@ object EventFilter extends App with EventMarshalling {
 
   val filter: Flow[Event, Event, NotUsed] = Flow[Event].filter(_.state == filterState)
 
+  import spray.json._
+  val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event].map(event => ByteString(event.toJson.compactPrint))
+
 
 
 }
