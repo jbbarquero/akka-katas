@@ -4,7 +4,8 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption._
 
 import akka.NotUsed
-import akka.stream.IOResult
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, IOResult}
 import akka.stream.scaladsl.{FileIO, Flow, Framing, Keep, RunnableGraph, Sink, Source}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
@@ -21,8 +22,11 @@ object EventFilter extends App with EventMarshalling {
   val config = ConfigFactory.load()
   val maxLine = config.getInt("log-stream-processor.max-line")
 
-  val source: Source[ByteString, Future[IOResult]] = FileIO.fromPath(Paths.get(args(0)))
-  val sink: Sink[ByteString, Future[IOResult]] = FileIO.toPath(Paths.get(args(1)), Set(CREATE, WRITE, APPEND))
+  val sourceFile = Paths.get(args(0))
+  val sinkFile = Paths.get(args(1))
+
+  val source: Source[ByteString, Future[IOResult]] = FileIO.fromPath(sourceFile)
+  val sink: Sink[ByteString, Future[IOResult]] = FileIO.toPath(sinkFile, Set(CREATE, WRITE, APPEND))
   val filterState = args(2) match {
     case State(state) => state
     case unknown =>
@@ -44,6 +48,15 @@ object EventFilter extends App with EventMarshalling {
   val composedFlow: Flow[ByteString, ByteString, NotUsed] = frame.via(parse).via(filter).via(serialize)
 
   val runnableGraph: RunnableGraph[Future[IOResult]] = source.via(composedFlow).toMat(sink)(Keep.right)
+
+  implicit val system = ActorSystem()
+  implicit val ec = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
+  runnableGraph.run().foreach { result =>
+    println(s"Wrote ${result.count} bytes from ${sourceFile.toFile.getAbsolutePath} to ${sinkFile.toFile.getAbsolutePath} filtered with $filterState")
+    system.terminate()
+  }
 
 
 
