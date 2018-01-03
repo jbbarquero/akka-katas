@@ -9,7 +9,12 @@ object Printer {
 }
 
 class Printer extends Actor with ActorLogging {
-  override def receive: Receive = ???
+  import Printer._
+
+  override def receive = {
+    case Greeting(greeting) =>
+      log.info(s"Greeting received from ${sender()}: $greeting")
+  }
 }
 
 object Greeter {
