@@ -5,7 +5,7 @@ import java.nio.file.StandardOpenOption._
 
 import akka.NotUsed
 import akka.stream.IOResult
-import akka.stream.scaladsl.{FileIO, Flow, Framing, Sink, Source}
+import akka.stream.scaladsl.{FileIO, Flow, Framing, Keep, RunnableGraph, Sink, Source}
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 
@@ -42,6 +42,8 @@ object EventFilter extends App with EventMarshalling {
   val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event].map(event => ByteString(event.toJson.compactPrint))
 
   val composedFlow: Flow[ByteString, ByteString, NotUsed] = frame.via(parse).via(filter).via(serialize)
+
+  val runnableGraph: RunnableGraph[Future[IOResult]] = source.via(composedFlow).toMat(sink)(Keep.right)
 
 
 
