@@ -1,6 +1,16 @@
 package com.malsolo.akka.quickstart.scala
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+
+object Printer {
+  final case class Greeting(greeting: String)
+
+  def props(): Props = Props[Printer]
+}
+
+class Printer extends Actor with ActorLogging {
+  override def receive: Receive = ???
+}
 
 object Greeter {
   final case class WhoToGreet(who: String)
