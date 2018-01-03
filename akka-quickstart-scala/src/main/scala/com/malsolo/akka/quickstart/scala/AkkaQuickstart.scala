@@ -25,7 +25,17 @@ object Greeter {
 }
 
 class Greeter(message: String, printerActor: ActorRef) extends Actor {
-  override def receive: Receive = ???
+  import Greeter._
+  import Printer._
+
+  var greeting = ""
+
+  override def receive = {
+    case WhoToGreet(who) =>
+      greeting = s"$message, $who"
+    case Greet =>
+      printerActor ! Greeting(greeting)
+  }
 }
 
 object AkkaQuickstart extends App {
