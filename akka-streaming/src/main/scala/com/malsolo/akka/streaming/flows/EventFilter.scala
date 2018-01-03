@@ -5,9 +5,10 @@ import java.nio.file.StandardOpenOption._
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, IOResult}
+import akka.stream._
 import akka.stream.scaladsl.{FileIO, Flow, Framing, Keep, RunnableGraph, Sink, Source}
 import akka.util.ByteString
+import com.malsolo.akka.streaming.flows.LogStreamProcessor.LogParseException
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
@@ -36,13 +37,21 @@ object EventFilter extends App with EventMarshalling {
 
   val frame: Flow[ByteString, String, NotUsed] = Framing.delimiter(ByteString("\n"), maxLine).map(_.decodeString("UTF8"))
 
+  val decider: Supervision.Decider = {
+    case ex: LogParseException =>
+      System.err.println(s"Error processing line: ${ex.getMessage}")
+      Supervision.Resume
+    case _ => Supervision.Stop
+  }
+
   val parse: Flow[String, Event, NotUsed] = Flow[String].map(LogStreamProcessor.parseLineEx).collect {
     case Some(e) => e
-  }
+  }.withAttributes(ActorAttributes.supervisionStrategy(decider))
 
   val filter: Flow[Event, Event, NotUsed] = Flow[Event].filter(_.state == filterState)
 
   import spray.json._
+
   val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event].map(event => ByteString(event.toJson.compactPrint + "\n"))
 
   val composedFlow: Flow[ByteString, ByteString, NotUsed] = frame.via(parse).via(filter).via(serialize)
@@ -51,13 +60,15 @@ object EventFilter extends App with EventMarshalling {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
-  implicit val materializer = ActorMaterializer()
+  //import akka.stream.ActorMaterializerSettings
+  implicit val materializer = ActorMaterializer(
+    //ActorMaterializerSettings(system).withSupervisionStrategy(decider)
+  )
 
   runnableGraph.run().foreach { result =>
     println(s"Wrote ${result.count} bytes from ${sourceFile.toFile.getAbsolutePath} to ${sinkFile.toFile.getAbsolutePath} filtered with $filterState")
     system.terminate()
   }
-
 
 
 }
