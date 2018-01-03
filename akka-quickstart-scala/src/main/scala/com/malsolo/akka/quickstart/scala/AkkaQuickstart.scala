@@ -1,6 +1,6 @@
 package com.malsolo.akka.quickstart.scala
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 
 object Printer {
 
@@ -44,5 +44,23 @@ class Greeter(message: String, printerActor: ActorRef) extends Actor {
 }
 
 object AkkaQuickstart extends App {
+  import Greeter._
+
+  val system = ActorSystem()
+
+  val printer = system.actorOf(Printer.props())
+
+  val helloGreeter = system.actorOf(Greeter.props("Hello", printer))
+  val byeGreeter = system.actorOf(Greeter.props("Good bye", printer))
+
+  helloGreeter ! WhoToGreet("World")
+  helloGreeter ! Greet
+
+  byeGreeter ! WhoToGreet("American pie")
+  byeGreeter ! Greet
+
+  Thread.sleep(1000)
+
+  system.terminate()
 
 }
