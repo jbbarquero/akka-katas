@@ -3,9 +3,11 @@ package com.malsolo.akka.streaming.flows
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption._
 
+import akka.NotUsed
 import akka.stream.IOResult
-import akka.stream.scaladsl.{FileIO, Sink, Source}
+import akka.stream.scaladsl.{FileIO, Flow, Framing, Sink, Source}
 import akka.util.ByteString
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 
@@ -16,6 +18,9 @@ object EventFilter extends App with EventMarshalling {
     System.exit(1)
   }
 
+  val config = ConfigFactory.load()
+  val maxLine = config.getInt("log-stream-processor.max-line")
+
   val source: Source[ByteString, Future[IOResult]] = FileIO.fromPath(Paths.get(args(0)))
   val sink: Sink[ByteString, Future[IOResult]] = FileIO.toPath(Paths.get(args(1)), Set(CREATE, WRITE, APPEND))
   val filterState = args(2) match {
@@ -24,9 +29,5 @@ object EventFilter extends App with EventMarshalling {
       System.err.print(s"Unknown state $unknown, exiting")
       System.exit(2)
   }
-
-
-
-
 
 }
