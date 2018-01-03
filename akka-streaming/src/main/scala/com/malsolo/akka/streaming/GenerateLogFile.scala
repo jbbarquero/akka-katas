@@ -33,7 +33,7 @@ object GenerateLogFile extends App {
     val host = hostname()
     val service = "service"
     val time = ZonedDateTime.now.format(DateTimeFormatter.ISO_INSTANT)
-    val state = if (i % 10 == 0) "warining"
+    val state = if (i % 10 == 0) "warning"
       else if (i % 101 == 0) "error"
       else if (i% 1002 == 0) "critical"
       else "ok"

@@ -34,7 +34,7 @@ object EventFilter extends App with EventMarshalling {
       System.exit(2)
   }
 
-  val frame: Flow[ByteString, String, NotUsed] = Framing.delimiter(ByteString("/n"), maxLine).map(_.decodeString("UTF8"))
+  val frame: Flow[ByteString, String, NotUsed] = Framing.delimiter(ByteString("\n"), maxLine).map(_.decodeString("UTF8"))
 
   val parse: Flow[String, Event, NotUsed] = Flow[String].map(LogStreamProcessor.parseLineEx).collect {
     case Some(e) => e
@@ -43,7 +43,7 @@ object EventFilter extends App with EventMarshalling {
   val filter: Flow[Event, Event, NotUsed] = Flow[Event].filter(_.state == filterState)
 
   import spray.json._
-  val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event].map(event => ByteString(event.toJson.compactPrint))
+  val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event].map(event => ByteString(event.toJson.compactPrint + "\n"))
 
   val composedFlow: Flow[ByteString, ByteString, NotUsed] = frame.via(parse).via(filter).via(serialize)
 
