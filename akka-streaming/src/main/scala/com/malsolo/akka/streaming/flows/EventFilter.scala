@@ -36,6 +36,8 @@ object EventFilter extends App with EventMarshalling {
     case Some(e) => e
   }
 
+  val filter: Flow[Event, Event, NotUsed] = Flow[Event].filter(_.state == filterState)
+
 
 
 }
