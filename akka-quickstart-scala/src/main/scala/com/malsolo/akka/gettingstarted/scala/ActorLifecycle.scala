@@ -1,4 +1,4 @@
-package com.malsolo.akka.quickstart.scala
+package com.malsolo.akka.gettingstarted.scala
 
 import akka.actor.{Actor, ActorSystem, Props}
 
