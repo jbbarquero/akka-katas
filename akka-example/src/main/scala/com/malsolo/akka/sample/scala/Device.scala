@@ -1,7 +1,5 @@
 package com.malsolo.akka.sample.scala
 
-import java.util.Optional
-
 import akka.actor.{Actor, ActorLogging, Props}
 
 object Device {
