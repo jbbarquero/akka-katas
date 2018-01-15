@@ -15,7 +15,7 @@ class DeviceSpec extends TestKit(ActorSystem("device-test-system"))
 
     deviceActor.tell(Device.ReadTemperature(42), probe.ref)
     val response = probe.expectMsgType[Device.RespondTemperature]
-    response.requesId must be (42)
+    response.requestId must be (42)
     response.value must be (None)
   }
 
@@ -37,7 +37,7 @@ class DeviceSpec extends TestKit(ActorSystem("device-test-system"))
 
     deviceActor.tell(Device.ReadTemperature(2), probe.ref)
     val response1 = probe.expectMsgType[Device.RespondTemperature]
-    response1.requesId must be (2)
+    response1.requestId must be (2)
     response1.value must be (Some(24.0))
   }
 

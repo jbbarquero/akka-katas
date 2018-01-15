@@ -9,7 +9,7 @@ object Device {
   final case class TemperatureRecorded(requestId: Long)
 
   final case class ReadTemperature(requestId: Long)
-  final case class RespondTemperature(requesId: Long, value: Option[Double])
+  final case class RespondTemperature(requestId: Long, value: Option[Double])
 }
 
 class Device(groupId: String, deviceId: String) extends Actor with ActorLogging {
