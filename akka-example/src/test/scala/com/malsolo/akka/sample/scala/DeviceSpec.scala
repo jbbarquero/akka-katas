@@ -41,4 +41,21 @@ class DeviceSpec extends TestKit(ActorSystem("device-test-system"))
     response1.value must be (Some(24.0))
   }
 
+  "reply with registration requests with success" in {
+    val probe = TestProbe()
+    val deviceActor = system.actorOf(Device.props("group", "device"))
+
+    deviceActor.tell(DeviceManager.RequrestTrackDevice("group", "device"), probe.ref)
+    probe.expectMsg(DeviceManager.DeviceRegistered("group", "device"))
+    probe.lastSender must be (deviceActor)
+  }
+
+  "reply with registration requests with failure" in {
+    val probe = TestProbe()
+    val deviceActor = system.actorOf(Device.props("group", "device"))
+
+    deviceActor.tell(DeviceManager.RequrestTrackDevice("wrongGroup", "wrongDevice"), probe.ref)
+    probe.expectMsg(DeviceManager.DeviceAlreadyRegistered("group", "device"))
+    probe.lastSender must be (deviceActor)
+  }
 }
