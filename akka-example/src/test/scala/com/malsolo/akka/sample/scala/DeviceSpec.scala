@@ -55,7 +55,7 @@ class DeviceSpec extends TestKit(ActorSystem("device-test-system"))
     val deviceActor = system.actorOf(Device.props("group", "device"))
 
     deviceActor.tell(DeviceManager.RequrestTrackDevice("wrongGroup", "wrongDevice"), probe.ref)
-    probe.expectMsg(DeviceManager.DeviceAlreadyRegistered("group", "device"))
+    probe.expectMsg(DeviceManager.IncorrectRequestTrackDevice("wrongGroup", "wrongDevice", "group", "device"))
     probe.lastSender must be (deviceActor)
   }
 }
