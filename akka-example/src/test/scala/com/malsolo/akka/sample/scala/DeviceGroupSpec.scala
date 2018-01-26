@@ -32,4 +32,19 @@ class DeviceGroupSpec extends TestKit(ActorSystem("devicegroup-test-system"))
     probe.expectMsg(DeviceManager.IncorrectRequestTrackDeviceForGroup("wronggroup", "group"))
   }
 
+  "return same actor for same deviceId" in {
+    val probe = TestProbe()
+    val groupActor = system.actorOf(DeviceGroup.props("group"))
+
+    groupActor.tell(DeviceManager.RequrestTrackDevice("group", "device1"), probe.ref)
+    probe.expectMsg(DeviceManager.DeviceRegistered("group", "device1"))
+    val deviceActor1 = probe.lastSender
+
+    groupActor.tell(DeviceManager.RequrestTrackDevice("group", "device1"), probe.ref)
+    probe.expectMsg(DeviceManager.DeviceRegistered("group", "device1"))
+    val deviceActor2 = probe.lastSender
+
+    deviceActor1 must be (deviceActor2)
+  }
+
 }
