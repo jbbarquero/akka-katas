@@ -91,8 +91,6 @@ class DeviceGroupSpec extends TestKit(ActorSystem("devicegroup-test-system"))
     toShutDown ! PoisonPill
     probe.expectTerminated(toShutDown)
 
-    Thread.sleep(2000)
-
     //THEN
     probe.awaitAssert {
       groupActor.tell(DeviceGroup.RequestDeviceList(1), probe.ref)

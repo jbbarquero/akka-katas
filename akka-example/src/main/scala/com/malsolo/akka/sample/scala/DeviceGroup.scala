@@ -29,6 +29,8 @@ class DeviceGroup(groupId: String) extends Actor with ActorLogging {
         case None =>
           log.info("Creating device actor for {}", trackMsg.deviceId)
           val deviceACtor = context.actorOf(Device.props(groupId, trackMsg.deviceId), s"device-${trackMsg.deviceId}")
+          context.watch(deviceACtor)
+          actorToDeviceId += deviceACtor -> trackMsg.deviceId
           deviceIdToActor += trackMsg.deviceId -> deviceACtor
           deviceACtor forward trackMsg
       }
