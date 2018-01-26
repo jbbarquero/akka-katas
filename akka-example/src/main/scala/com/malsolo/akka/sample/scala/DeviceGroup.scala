@@ -1,6 +1,6 @@
 package com.malsolo.akka.sample.scala
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import com.malsolo.akka.sample.scala.DeviceManager.IncorrectRequestTrackDeviceForGroup
 import com.malsolo.akka.sample.scala.DeviceManager.RequrestTrackDevice
 
@@ -11,6 +11,7 @@ object DeviceGroup {
 class DeviceGroup(groupId: String) extends Actor with ActorLogging {
 
   var deviceIdToActor = Map.empty[String, ActorRef]
+  var actorToDeviceId = Map.empty[ActorRef, String]
 
   override def preStart(): Unit = log.info("Device group {} started", groupId)
 
@@ -30,5 +31,10 @@ class DeviceGroup(groupId: String) extends Actor with ActorLogging {
     case RequrestTrackDevice(groupId, deviceId) =>
       log.warning("Ignoring TrackDevice request for {}. This actor is responsible for {}.", groupId, this.groupId)
       sender() ! IncorrectRequestTrackDeviceForGroup(IncorrectGroupId = groupId, managedGroupId = this.groupId)
+    case Terminated(deviceActor) =>
+      val deviceActorId = actorToDeviceId.get(deviceActor)
+      log.info("Device actor for {} has been terminated", deviceActorId)
+      actorToDeviceId -= deviceActor
+      deviceIdToActor -= deviceActorId.get
   }
 }
