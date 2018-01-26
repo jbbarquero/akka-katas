@@ -40,9 +40,9 @@ class DeviceGroup(groupId: String) extends Actor with ActorLogging {
     case RequestDeviceList(requestId) ⇒
       sender() ! ReplyDeviceList(requestId, deviceIdToActor.keySet)
     case Terminated(deviceActor) =>
-      val deviceActorId = actorToDeviceId.get(deviceActor)
+      val deviceActorId = actorToDeviceId(deviceActor)
       log.info("Device actor for {} has been terminated", deviceActorId)
       actorToDeviceId -= deviceActor
-      deviceIdToActor -= deviceActorId.get
+      deviceIdToActor -= deviceActorId
   }
 }
