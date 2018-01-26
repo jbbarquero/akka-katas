@@ -47,4 +47,24 @@ class DeviceGroupSpec extends TestKit(ActorSystem("devicegroup-test-system"))
     deviceActor1 must be (deviceActor2)
   }
 
+  "be able to list active devices" in {
+
+    //GIVEN
+    val probe = TestProbe()
+    val groupActor = system.actorOf(DeviceGroup.props("group"))
+
+    //AND
+    groupActor.tell(DeviceManager.RequrestTrackDevice("group", "device1"), probe.ref)
+    probe.expectMsg(DeviceManager.DeviceRegistered("group", "device1"))
+
+    groupActor.tell(DeviceManager.RequrestTrackDevice("group", "device2"), probe.ref)
+    probe.expectMsg(DeviceManager.DeviceRegistered("group", "device2"))
+
+    //WHEN
+    groupActor.tell(DeviceGroup.RequestDeviceList(1), probe.ref);
+
+    //THEN
+    probe.expectMsg(DeviceGroup.ReplyDeviceList(1, Set("device1", "device2")))
+  }
+
 }
