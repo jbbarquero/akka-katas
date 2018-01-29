@@ -10,12 +10,6 @@ object DeviceGroup {
 
   final case class RequestDeviceList(requestId: Long)
   final case class ReplyDeviceList(requestId: Long, ids: Set[String])
-}
-
-class DeviceGroup(groupId: String) extends Actor with ActorLogging {
-
-  var deviceIdToActor = Map.empty[String, ActorRef]
-  var actorToDeviceId = Map.empty[ActorRef, String]
 
   final case class RequestAllTemperatures(requestId: Long)
   final case class RespondAllTemperatures(requestId: Long, temperatures: Map[String, TemperatureReading])
@@ -25,6 +19,13 @@ class DeviceGroup(groupId: String) extends Actor with ActorLogging {
   case object TemperatureNotAvailable extends TemperatureReading
   case object DeviceNotAvailable extends TemperatureReading
   case object DeviceTimedOut extends TemperatureReading
+
+}
+
+class DeviceGroup(groupId: String) extends Actor with ActorLogging {
+
+  var deviceIdToActor = Map.empty[String, ActorRef]
+  var actorToDeviceId = Map.empty[ActorRef, String]
 
   override def preStart(): Unit = log.info("Device group {} started", groupId)
 
