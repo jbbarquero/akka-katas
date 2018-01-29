@@ -1,6 +1,6 @@
 package com.malsolo.akka.sample.scala
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
+import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable, Props, Terminated}
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -26,7 +26,7 @@ class DeviceGroupQuery(
 
   import DeviceGroupQuery._
   import context.dispatcher
-  val queryTimeoutTimer = context.system.scheduler.scheduleOnce(timeout, self, CollectionTimeout)
+  val queryTimeoutTimer: Cancellable = context.system.scheduler.scheduleOnce(timeout, self, CollectionTimeout)
 
   override def preStart(): Unit = {
     actorToDeviceId.keysIterator.foreach { deviceActor =>
