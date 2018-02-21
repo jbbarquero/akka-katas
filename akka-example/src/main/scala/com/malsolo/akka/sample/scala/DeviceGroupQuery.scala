@@ -71,6 +71,19 @@ class DeviceGroupQuery(
     reading:      DeviceGroup.TemperatureReading,
     stillWaiting: Set[ActorRef],
     repliesSoFar: Map[String, DeviceGroup.TemperatureReading]
-  ): Unit = ???
+  ): Unit = {
+    context.unwatch(deviceActor)
+    val deviceId = actorToDeviceId(deviceActor)
+    val newStillWaiting = stillWaiting - deviceActor
+
+    val newRepliesSoFar = repliesSoFar + (deviceId -> reading)
+    if (newStillWaiting isEmpty) {
+      requester ! DeviceGroup.RespondAllTemperatures(requestId, newRepliesSoFar)
+      context.stop(self)
+    }
+    else {
+      context.become(waitingForReplies(newRepliesSoFar, newStillWaiting))
+    }
+  }
 
 }
