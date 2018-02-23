@@ -39,7 +39,7 @@ class DeviceGroupQuery(
     queryTimeoutTimer.cancel()
   }
 
-  override def receive: Receive = ???
+  override def receive: Receive = waitingForReplies(Map.empty, actorToDeviceId.keySet)
 
   def waitingForReplies(
      repliesSoFar: Map[String, DeviceGroup.TemperatureReading],

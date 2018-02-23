@@ -28,7 +28,7 @@ class DeviceGroupQuerySpec extends TestKit(ActorSystem("devicegroupquery-test-sy
     device2.expectMsg(Device.ReadTemperature(requestId = 0))
 
     queryActor.tell(Device.RespondTemperature(requestId = 0, Some(1.0)), device1.ref)
-    queryActor.tell(Device.RespondTemperature(requestId = 0, Some(1.0)), device2.ref)
+    queryActor.tell(Device.RespondTemperature(requestId = 0, Some(2.0)), device2.ref)
 
     requester.expectMsg(DeviceGroup.RespondAllTemperatures(
       requestId = 1,
