@@ -1,8 +1,7 @@
 package com.malsolo.akka.sample.scala
 
 import scala.concurrent.duration._
-
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, PoisonPill}
 import akka.testkit.{TestKit, TestProbe}
 import org.scalatest.{MustMatchers, WordSpecLike}
 
@@ -65,6 +64,35 @@ class DeviceGroupQuerySpec extends TestKit(ActorSystem("devicegroupquery-test-sy
         "device2" -> DeviceGroup.Temperature(2.0)
       )
     ))
+  }
+
+  "return DeviceNotAvailable if device stops before answering" in {
+    val requester = TestProbe()
+
+    val device1 = TestProbe()
+    val device2 = TestProbe()
+
+    val queryActor = system.actorOf(DeviceGroupQuery.props(
+      actorToDeviceId = Map(device1.ref -> "device1", device2.ref -> "device2"),
+      requestId = 1,
+      requester = requester.ref,
+      timeout = 3 seconds
+    ))
+
+    device1.expectMsg(Device.ReadTemperature(requestId = 0))
+    device2.expectMsg(Device.ReadTemperature(requestId = 0))
+
+    queryActor.tell(Device.RespondTemperature(requestId = 0, Some(1.0)), device1.ref)
+    device2.ref ! PoisonPill
+
+    requester.expectMsg(DeviceGroup.RespondAllTemperatures(
+      requestId = 1,
+      temperatures = Map(
+        "device1" -> DeviceGroup.Temperature(1.0),
+        "device2" -> DeviceGroup.DeviceNotAvailable
+      )
+    ))
+
   }
 
 }
