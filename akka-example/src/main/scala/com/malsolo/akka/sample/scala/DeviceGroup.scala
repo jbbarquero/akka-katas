@@ -1,9 +1,10 @@
 package com.malsolo.akka.sample.scala
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
-import com.malsolo.akka.sample.scala.DeviceGroup.{ReplyDeviceList, RequestDeviceList}
+import com.malsolo.akka.sample.scala.DeviceGroup.{ReplyDeviceList, RequestAllTemperatures, RequestDeviceList}
 import com.malsolo.akka.sample.scala.DeviceManager.IncorrectRequestTrackDeviceForGroup
 import com.malsolo.akka.sample.scala.DeviceManager.RequrestTrackDevice
+import scala.concurrent.duration._
 
 object DeviceGroup {
   def props(groupId: String): Props = Props(new DeviceGroup(groupId))
@@ -54,5 +55,12 @@ class DeviceGroup(groupId: String) extends Actor with ActorLogging {
       log.info("Device actor for {} has been terminated", deviceActorId)
       actorToDeviceId -= deviceActor
       deviceIdToActor -= deviceActorId
+    case RequestAllTemperatures(requestId) =>
+      context.actorOf(DeviceGroupQuery.props(
+        actorToDeviceId = actorToDeviceId,
+        requestId = requestId,
+        sender(),
+        3 seconds
+      ))
   }
 }
